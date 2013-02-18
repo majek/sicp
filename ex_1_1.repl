@@ -1,5 +1,5 @@
 % -*-mode:scheme; -*-
-% Exercise 1.1 (page 20)
+% Exercise 1.1
 > 10
 10
 > (+ 5 3 4)
@@ -31,3 +31,69 @@ false
            (else -1))
      (+ a 1))
 16
+
+# Exercise 1.2
+> (define ex_1_2 (/ (+ 5 4 (- 2 (- 3 (+ 6 (/ 4 5)))))
+                      (* 3 (- 6 2) (- 2 7))))
+> ex_1_2
+(/ -37 150)
+
+# Exercise 1.3
+> (define (is_min? a b c) (and (<= a b) (<= a c)))
+> (is_min? 3 2 1)
+false
+> (is_min? 1 2 3)
+true
+> (is_min? 2 1 3)
+false
+> (define (sum_two_sq a b) (+ (* a a) (* b b)))
+> (sum_two_sq 2 3)
+(+ 4 9)
+> (define (sum_max_two_sq a b c)
+    (cond ((is_min? a b c) (sum_two_sq b c))
+          ((is_min? b c a) (sum_two_sq a c))
+          (else (sum_two_sq a b))))
+> (sum_max_two_sq 1 2 3)
+(+ 4 9)
+> (sum_max_two_sq 2 1 3)
+(+ 4 9)
+> (sum_max_two_sq 3 2 1)
+(+ 4 9)
+> (sum_max_two_sq 2 2 2)
+(+ 4 4)
+
+# Exercise 1.4
+> (define (a-plus-abs-b a b)
+    ((if (> b 0) + -) a b))
+> (a-plus-abs-b 1 2)
+3
+> (a-plus-abs-b 1 -2)
+3
+
+# Exercise 1.5
+> (define (p) (p))
+> (define (xtest x y)
+    (if (= x 0)
+        0
+        y))
+% > (xtest 0 (p)) would never finish in normal-order evaluation
+% and would return 0 in applicative-order evaluation
+
+# Example 1.1.7
+> (define (int x) (inexact->exact (floor 2.2)))
+> (define (sqrt-iter guess x)
+    (if (good-enough? guess x)
+        guess
+        (sqrt-iter (improve guess x)
+                   x)))
+> (define (improve guess x)
+    (average guess (/ x guess)))
+> (define (average x y)
+    (/ (+ x y) 2))
+> (define (good-enough? guess x)
+    (< (abs (- (square guess) x)) 0.001))
+> (define (sqrt x)
+    (sqrt-iter 1.0 x))
+> (define (square x) (* x x))
+> (int (sqrt 4))
+2
