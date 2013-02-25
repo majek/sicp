@@ -79,8 +79,8 @@ false
 % > (xtest 0 (p)) would never finish in normal-order evaluation
 % and would return 0 in applicative-order evaluation
 
-# Example 1.1.7
-> (define (int x) (inexact->exact (floor 2.2)))
+# Exercise 1.7
+# > (define (int x) (inexact->exact (floor x)))
 > (define (sqrt-iter guess x)
     (if (good-enough? guess x)
         guess
@@ -91,9 +91,183 @@ false
 > (define (average x y)
     (/ (+ x y) 2))
 > (define (good-enough? guess x)
-    (< (abs (- (square guess) x)) 0.001))
+    (< (abs (- (square guess) x)) 0.0001))
 > (define (sqrt x)
     (sqrt-iter 1.0 x))
 > (define (square x) (* x x))
-> (int (sqrt 4))
+.> (sqrt 4)
+2.0000000929222947
+.> (sqrt 9)
+3.
+.> (sqrt (square 9999999999999999999999))
+9999999999999999999999.
+.> (sqrt 9.)
+3.
+
+# For too small or big numbers float is not enough
+.> (sqrt (square 0.001))
+0.007855117545897352
+
+# Make sqrt stop when abs(guess, new_guess) < 0.0001
+> (define (good-fract-enough? guess x)
+    (< (abs (- guess (improve guess x))) 0.0001))
+> (define (sqrt-fract-iter guess x)
+    (if (good-fract-enough? guess x)
+        guess
+        (sqrt-fract-iter (improve guess x)
+                   x)))
+> (define (sqrt-fract x)
+    (sqrt-fract-iter 1.0 x))
+.> (sqrt-fract 4.)
+2.0000000929222947
+.> (sqrt-fract (square 0.0001))
+0.00014822847335384218
+.> (sqrt-fract (square 999999999999999999999999999))
+999999999999999999999999999.
+# I guess better for small worse for both
+
+
+# Exercise 1.8
+> (define (cube x) (* x x x))
+> (define (cube-root x)
+    (define (cr-improve y)
+      (/ (+ (/ x (* y y)) (* 2 y)) 3))
+    (define (cr-good? y)
+      (< (abs (- y (cr-improve y))) 0.0001))
+    (define (cr-iter y)
+      (if (cr-good? y)
+          y
+          (cr-iter (cr-improve y))))
+    (cr-iter 1.0))
+.> (cube-root 27.)
+3.0000005410641766
+.> (cube-root (cube 127))
+127.
+.> (cube-root (cube 2))
+2.000004911675504
+
+# Exercise 1.9
+> (define (inc a) (+ a 1))
+> (define (dec a) (- a 1))
+> (define (plus-a a b)
+    (if (= a 0)
+        b
+        (inc (plus-a (dec a) b))))
+> (plus-a 7 8)
+15
+
+> (define (plus-b a b)
+    (if (= a 0)
+        b
+        (plus-b (dec a) (inc b))))
+> (plus-b 7 8)
+15
+> 1
+1
+# a. Recursive  b. Iterative
+
+# Exercise 1.10
+> (define (pow a b)
+    (if (= b 1) a
+        (* a (pow a (- b 1)))))
+> (define (A x y)
+    (cond ((= y 0) 0)
+          ((= x 0) (* 2 y))
+          ((= y 1) 2)
+          (else (A (- x 1)
+                   (A x (- y 1))))))
+> (A 1 10)
+(pow 2 10)
+> (A 2 4)
+(pow 2 (pow 2 4))
+> (A 3 3)
+(pow 2 16)
+
+# A(0, n) --> 2 * n
+# A(1, n) --> 2 ** n
+# A(2, b) --> 2 ** (2 ** n)
+
+
+# Exercise 1.11
+# Tree-recursive!
+> (define (ex-1-11-recursive n)
+    (if (< n 3) n
+        (+ (ex-1-11-recursive (- n 1))
+           (* 2 (ex-1-11-recursive (- n 2)))
+           (* 3 (ex-1-11-recursive (- n 3))))))
+> (ex-1-11-recursive 10)
+1892
+> (ex-1-11-recursive 17)
+804616
+
+> (define (ex-1-11-iterative n)
+    (define (iter count d c b)
+      (let ((a (+ b (* 2 c) (* 3 d))))
+        (if (= count n) a
+            (iter (+ 1 count) c b a))))
+    (if (< n 3) n
+        (iter 3 0 1 2)))
+> (ex-1-11-iterative 10)
+1892
+> (ex-1-11-iterative 17)
+804616
+
+
+# Exercise 1.12
+> (define (pascal-triangle row col)
+    (cond ((= col 0) 1)
+          ((= col row) 1)
+          (else (+ (pascal-triangle (- row 1) (- col 1))
+                   (pascal-triangle (- row 1) col)))))
+> (pascal-triangle 0 0)
+1
+> (pascal-triangle 1 0)
+1
+> (pascal-triangle 1 1)
+1
+> (pascal-triangle 2 1)
 2
+> (pascal-triangle 3 1)
+3
+> (pascal-triangle 4 1)
+4
+> (pascal-triangle 4 2)
+6
+
+# Exercise 1.13
+# Prove...
+
+# Exercise 1.14
+# Similar to our first fib() implementation - O(fi**n)
+
+# Exercise 1.15
+# a. p is applied 5 times (12.15 / 3**5) < 0.1
+# b. steps: linear size: constant
+
+# Exercise 1.16
+#      (fprintf (current-output-port)
+#               "~s**~s * ~s\n" b n a)
+
+> (define (fexp b n)
+    (define (even? n)
+      (= (remainder n 2) 0))
+    (define (iter b n a)
+      (cond ((= n 0) a)
+            ((even? n) (iter (* b b) (/ n 2) a))
+            (else (iter b (- n 1) (* a b)))))
+    (iter b n 1))
+> (fexp 2 10)
+1024
+> (fexp 2 11)
+2048
+> (fexp 2 14)
+16384
+> (fexp 2 2)
+4
+> (fexp 2 1)
+2
+> (fexp 2 0)
+1
+> (fexp 3 3)
+27
+
